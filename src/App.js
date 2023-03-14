@@ -1,39 +1,53 @@
-import React,{useState} from 'react';
-import "./App.css"
+import React, { useEffect, useState } from "react";
+import { ToastContainer } from "react-toastify";
+import { Route, Routes } from 'react-router-dom';
 
-function App() {
-  //hooks for deciding hover or not hover
-const [focus, setFocus] = useState(false);
-//hooks for setting position
-const [position, setPosition] = useState("top")
+import Navbar from "./components/Navbar";
+import Home from "./components/Home";
+import AddContact from "./components/AddContact";
+import EditContact from "./components/EditContact";
+import { useDispatch } from "react-redux";
 
-const hoverIn=()=>{
-setFocus(true);
-}
-const hoverOut=()=>{
-  setFocus(false);
-  }
-  const visible={display:focus?"block":"none"}
-  function handleClick(e){
+const App = () => {
+    const dispatch = useDispatch();
+    useEffect(() => {
+        const data = [];
+        const promise = async () => {
+            await fetch('https://jsonplaceholder.typicode.com/users/')
+                .then((response) => response.json())
+                .then((json) => {
+                    json.map((contact) => {
+                        data.push({
+                            id: contact.id,
+                            name: contact.name,
+                            number: contact.phone,
+                            email: contact.email
+                        });
+                    })
+                });
+            dispatch({ type: 'FETCH_CONTACTS', payload: data });
+        };
+        promise();
+    }, []);
 
-    setPosition(e.target.value
-    )
-  }
-  return (
-    <div className="App">
-      <h1>Tooltip</h1>
-      <div className='btns'>
-        <div className='btn'><button onClick={handleClick} value="top">Top</button></div>
-        <div className='btn'><button onClick={handleClick} value="bottom">Bottom</button></div>
-        <div className='btn'><button onClick={handleClick} value="right">Right</button></div>
-        <div className='btn'><button onClick={handleClick} value="left">Left</button></div>
-      </div>
-      <div className='hover'>
-        <button onMouseOver={hoverIn} onMouseOut={hoverOut}>Hover over me</button>
-        <div className={position} style={visible}>Thanks for Hovering! I am in {position} tooltip</div>
-      </div>
-    </div>
-  );
+
+    return (
+        <div className="App">
+            <ToastContainer />
+            <Navbar />
+            <Routes>
+                <Route exact path="/" element={<Home />}>
+
+                </Route>
+                <Route path="/add" element={<AddContact />}>
+
+                </Route>
+                <Route path="/edit/:id" element={<EditContact />}>
+
+                </Route>
+            </Routes>
+        </div>
+    );
 }
 
 export default App;
